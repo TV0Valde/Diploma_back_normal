@@ -12,7 +12,7 @@ namespace Domain.EntityTypeConfiguration
             builder.HasKey(pr => pr.Id);
   
             builder
-                .HasOne(pr => pr.Points)
+                .HasOne(pr => pr.Point)
                 .WithMany(p => p.Records)
                 .HasForeignKey(pr => pr.PointId)
                 .OnDelete(DeleteBehavior.Cascade); 

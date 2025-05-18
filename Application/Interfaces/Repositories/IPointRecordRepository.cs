@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.CQRS.DTO.Points;
+using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces.Repositories;
 

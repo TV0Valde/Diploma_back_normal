@@ -1,4 +1,5 @@
 ﻿using Application.CQRS.DTO.Points;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces.Services;
 
@@ -13,7 +14,7 @@ public interface IPointRecordService
     /// <param name="pointId">Id точки</param>
     /// <param name="recordDto">Сущность записи.</param>
     /// <returns>Новая запись.</returns>
-    Task<PointRecordDto?> CreateRecordAsync(int pointId, PointRecordDto recordDto);
+    Task<PointRecordDto?> CreateRecordAsync(int pointId, PointRecordDto recordDto, IFormFile? photoFile = null);
 
     /// <summary>
     /// Удаление Записи.
@@ -28,7 +29,7 @@ public interface IPointRecordService
     /// <param name="recordId">Id Записи.</param>
     /// <param name="recordDto">Сущность записи.</param>
     /// <returns></returns>
-    Task<PointRecordDto?> UpdateRecordAsync(int recordId, PointRecordDto recordDto);
+    Task<PointRecordDto?> UpdateRecordAsync(int recordId, PointRecordDto recordDto, IFormFile? photoFile);
 
     /// <summary>
     /// Получение коллекция записей для точки.

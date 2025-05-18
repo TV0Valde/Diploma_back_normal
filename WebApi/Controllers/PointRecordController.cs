@@ -25,7 +25,7 @@ public class PointRecordsController : ControllerBase
         return Ok(records);
     }
 
-    
+
     [HttpGet("pointRecord/{recordId}")]
     public async Task<IActionResult> GetRecordById(int recordId)
     {
@@ -37,31 +37,26 @@ public class PointRecordsController : ControllerBase
         return Ok(record);
     }
 
-   
+
     [HttpPost("point/{pointId}/records")]
-    public async Task<IActionResult> CreateRecord(int pointId, AddPointRecordCommand command)
+    public async Task<IActionResult> CreateRecord(int pointId, [FromForm] AddPointRecordCommand command)
     {
         var createdRecord = await _mediator.Send(command);
-        if (createdRecord == null)
-        {
-            return BadRequest($"Point with ID {pointId} not found.");
-        }
-        return CreatedAtAction(nameof(GetRecordById), new { recordId = createdRecord.Id }, createdRecord);
+
+        return CreatedAtAction(nameof(GetRecordById), new { recordId = createdRecord?.Id }, createdRecord);
     }
 
-    
+
     [HttpPut("pointRecord/{recordId}")]
-    public async Task<IActionResult> UpdateRecord(int recordId, UpdatePointRecordCommand command)
+    public async Task<IActionResult> UpdateRecord(int recordId, [FromForm] UpdatePointRecordCommand command)
     {
-        var updatedRecord = await _mediator.Send(command);
-        if (updatedRecord == null)
-        {
-            return NotFound();
-        }
-        return Ok(updatedRecord);
+        command.RecordId = recordId;
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
-    
+
     [HttpDelete("pointRecord/{recordId}")]
     public async Task<IActionResult> DeleteRecord(int recordId)
     {

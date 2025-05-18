@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Mapster;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services;
 
@@ -13,16 +14,18 @@ public class PointRecordService : IPointRecordService
 {
     private readonly IPointsRepository _pointsRepository;
     private readonly IPointRecordRepository _recordRepository;
+    private readonly IFileStorageRepository _fileStorageRepository;
 
     /// <summary>
     /// Создание экземпляра <see cref="PointRecordService"/>.
     /// </summary>
     /// <param name="pointsRepository">Репозиторий для работы с точками</param>
     /// <param name="recordRepository">Репозиторий для работы с записями.</param>
-    public PointRecordService(IPointsRepository pointsRepository, IPointRecordRepository recordRepository)
+    public PointRecordService(IPointsRepository pointsRepository, IPointRecordRepository recordRepository, IFileStorageRepository fileStorageRepository)
     {
         _pointsRepository = pointsRepository;
         _recordRepository = recordRepository;
+        _fileStorageRepository = fileStorageRepository;
     }
 
     /// <summary>
@@ -32,19 +35,23 @@ public class PointRecordService : IPointRecordService
     /// <param name="recordDto">Сущность записи для работы с БД.</param>
     /// <returns>Новая запись.</returns>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<PointRecordDto?> CreateRecordAsync(int pointId, PointRecordDto recordDto)
+    public async Task<PointRecordDto?> CreateRecordAsync(int pointId, PointRecordDto recordDto, IFormFile? photoFile = null)
     {
         var point = await _pointsRepository.GetPointByIdAsync(pointId);
-        if (point == null)
+        if (point is null)
         {
             throw new KeyNotFoundException($"Point with ID {pointId} not found.");
         }
 
         var record = recordDto.Adapt<PointRecordsEntity>();
-        record.PointId = pointId;
+        if (photoFile is not null)
+        {
+            record.PhotoId = await _fileStorageRepository.UploadAsync(photoFile, "cracks");
+        }
+        record.PhotoUrl = $"/cracks/{record.PhotoId}.png";
 
         var createdRecord = await _recordRepository.CreateRecordAsync(record);
-        return createdRecord.Adapt<PointRecordDto>();
+        return PointRecordDto.CreateFrom(createdRecord);
     }
 
     /// <summary>
@@ -59,6 +66,11 @@ public class PointRecordService : IPointRecordService
             throw new KeyNotFoundException($"Record with ID {recordId} not found.");
         }
 
+        if (existingRecord.PhotoId.HasValue)
+        {
+            await _fileStorageRepository.DeleteAsync(existingRecord.PhotoId.Value);
+        }
+
         await _recordRepository.DeleteRecordAsync(recordId);
     }
 
@@ -69,21 +81,31 @@ public class PointRecordService : IPointRecordService
     /// <param name="recordDto">Сущность записи для работы с БД.</param>
     /// <returns>Обновленная запись.</returns>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<PointRecordDto?> UpdateRecordAsync(int recordId, PointRecordDto recordDto)
+    public async Task<PointRecordDto?> UpdateRecordAsync(int recordId, PointRecordDto recordDto, IFormFile? photoFile = null)
     {
         var existingRecord = await _recordRepository.GetRecordByIdAsync(recordId);
         if (existingRecord == null)
         {
             throw new KeyNotFoundException($"Record with ID {recordId} not found.");
         }
-
-        existingRecord.PhotoData = recordDto.PhotoData;
+        
         existingRecord.Info = recordDto.Info;
         existingRecord.MaterialName = recordDto.MaterialName;
         existingRecord.CheckupDate = recordDto.CheckupDate;
 
-        await _recordRepository.UpdateRecordAsync(existingRecord);
-        return existingRecord.Adapt<PointRecordDto>();
+        if (photoFile is not null)
+        {
+
+            if (existingRecord.PhotoId.HasValue)
+            {
+
+                await _fileStorageRepository.DeleteAsync(existingRecord.PhotoId.Value);
+
+            }
+            existingRecord.PhotoId = await _fileStorageRepository.UploadAsync(photoFile, "cracks");
+        }
+
+        return PointRecordDto.CreateFrom(existingRecord);
     }
 
     /// <summary>
@@ -94,7 +116,7 @@ public class PointRecordService : IPointRecordService
     public async Task<IEnumerable<PointRecordDto>> GetRecordsByPointIdAsync(int pointId)
     {
         var records = await _recordRepository.GetRecordsByPointIdAsync(pointId);
-        return records.Select(x => x.Adapt<PointRecordDto>());
+        return records.Select(PointRecordDto.CreateFrom);
     }
 }
 

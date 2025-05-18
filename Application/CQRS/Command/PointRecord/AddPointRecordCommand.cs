@@ -4,6 +4,8 @@ using MediatR;
 using Domain.Entities;
 using Mapster;
 using System.Text.Json.Serialization;
+using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.CQRS.Command.PointRecord;
 
@@ -21,8 +23,8 @@ public class AddPointRecordCommand : IRequest<PointRecordDto?>
     /// <summary>
     /// Путь до изображения
     /// </summary>
-    [JsonPropertyName("photoData")]
-    public string? PhotoData { get; set; }
+    [JsonPropertyName("photoFile")]
+    public IFormFile? PhotoFile { get; set; }
 
     /// <summary>
     /// Информация о состоянии знания в кооринатах.
@@ -42,37 +44,36 @@ public class AddPointRecordCommand : IRequest<PointRecordDto?>
     [JsonPropertyName("checkupDate")]
     public DateOnly? CheckupDate { get; set; }
 
-    public AddPointRecordCommand(int pointId, string? photoData, string? info, string? materialName, DateOnly? checkupDate)
+    public AddPointRecordCommand(int pointId, IFormFile? photoFile, string? info, string? materialName, DateOnly? checkupDate)
     {
         PointId = pointId;
-        PhotoData = photoData;
+        PhotoFile = photoFile;
         Info = info;
         MaterialName = materialName;
         CheckupDate = checkupDate;
     }
 
+    public AddPointRecordCommand() { }
+
     public class AddPointRecordCommandHandler : IRequestHandler<AddPointRecordCommand, PointRecordDto?>
     {
-        private readonly IPointRecordRepository _repository;
+        private readonly IPointRecordService _service;
 
-        public AddPointRecordCommandHandler(IPointRecordRepository repository)
+        public AddPointRecordCommandHandler(IPointRecordService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
         public async Task<PointRecordDto?> Handle(AddPointRecordCommand request, CancellationToken cancellationToken)
         {
-            var record = new PointRecordsEntity
+            var dto = new PointRecordDto
             {
                 PointId = request.PointId,
-                PhotoData = request.PhotoData,
                 Info = request.Info,
                 MaterialName = request.MaterialName,
-                CheckupDate = request.CheckupDate
+                CheckupDate = request.CheckupDate,
             };
-
-            var createdRecord = await _repository.CreateRecordAsync(record);
-            return createdRecord.Adapt<PointRecordDto>();
+            return await _service.CreateRecordAsync(request.PointId, dto, request.PhotoFile);
         }
     }
 }

@@ -57,7 +57,7 @@ public class PointRecordRepository : IPointRecordRepository
     public async Task UpdateRecordAsync(PointRecordsEntity record)
     {
         var existingRecord = await _context.Records
-            .Include(r => r.Points)
+            .Include(r => r.Point)
             .FirstOrDefaultAsync(r => r.Id == record.Id);
 
         if (existingRecord == null)

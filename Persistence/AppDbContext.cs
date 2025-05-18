@@ -20,6 +20,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<BuildingInfoEntity> Infos { get; set; }
 
+    public DbSet<PointPhoto> PointPhotos { get; set; }
+
     /// <inheritdoc/>
     public ApplicationDbContext(DbContextOptions options)
         : base(options)

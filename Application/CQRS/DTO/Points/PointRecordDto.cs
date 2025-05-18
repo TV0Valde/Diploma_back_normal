@@ -14,8 +14,12 @@ public class PointRecordDto
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
+    /// Id точки
+    [JsonPropertyName("pointId")]
+    public int PointId { get; set; }
+
     /// <summary>
-    /// Информация о состоянии знания в кооринатах.
+    /// Информация о состоянии здания.
     /// </summary>
     [JsonPropertyName("info")]
     public string? Info { get; set; }
@@ -27,10 +31,17 @@ public class PointRecordDto
     public string? MaterialName { get; set; }
 
     /// <summary>
+    /// Id изображения
+    /// </summary>
+    [JsonPropertyName("photoId")]
+    public Guid? PhotoId { get; set; }
+
+    /// <summary>
     /// Путь до изображения
     /// </summary>
-    [JsonPropertyName("photoData")]
-    public string? PhotoData { get; set; }
+    [JsonPropertyName("photoUrl")]
+    public string? PhotoUrl { get; set; }
+
 
     /// <summary>
     /// Дата осмотра
@@ -46,5 +57,6 @@ public class PointRecordDto
     public static PointRecordDto? CreateFrom(Domain.Entities.PointRecordsEntity? record)
     {
         return record?.Adapt<PointRecordDto>();
+
     }
 }

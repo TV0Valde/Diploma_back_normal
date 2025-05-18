@@ -39,6 +39,8 @@ namespace WebApi
             builder.Services.AddScoped<IPointRecordRepository, PointRecordRepository>();
             builder.Services.AddScoped<IBuildingInfoRepository, BuildingInfoRepository>();
             builder.Services.AddScoped<IBuildingInfoService, BuildingInfoService>();
+                 builder.Services.AddScoped<IFileStorageRepository, MinioFileStorageRepository>();
+            builder.Services.AddScoped<IPointRecordService, PointRecordService>(); ;
             builder.Services.AddControllers();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>

@@ -69,11 +69,18 @@ public class PointsService : IPointsService
     /// </summary>
     /// <param name="point">Точка.</param>
     /// <returns>Обновленная точка.</returns>
-    public async Task<PointsResultDto?> UpdatePointAsync(Points point)
+    public async Task<PointsResultDto?> UpdatePointAsync(long id)
     {
+        var point = await _pointsRepository.GetPointByIdAsync(id);
+
+        if (point is null)
+        {
+            throw new InvalidOperationException();
+        }
+
         await _pointsRepository.UpdatePointAsync(point);
 
-        return point?.Adapt<PointsResultDto>();
+        return PointsResultDto.CreateFrom(point);
     }
 
     /// <summary>

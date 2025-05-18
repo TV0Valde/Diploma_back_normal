@@ -4,6 +4,8 @@ using MediatR;
 using Domain.Entities;
 using Mapster;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
+using Application.Interfaces.Services;
 
 namespace Application.CQRS.Command.PointRecords;
 
@@ -17,11 +19,12 @@ public class UpdatePointRecordCommand : IRequest<PointRecordDto?>
     /// </summary>
     [JsonPropertyName("id")]
     public int RecordId { get; set; }
+
     /// <summary>
     /// Путь до изображения
     /// </summary>
-    [JsonPropertyName("photoData")]
-    public string? PhotoData { get; set; }
+    [JsonPropertyName("photoFile")]
+    public IFormFile? PhotoFile { get; set; }
 
     /// <summary>
     /// Информация о состоянии знания в кооринатах.
@@ -41,10 +44,10 @@ public class UpdatePointRecordCommand : IRequest<PointRecordDto?>
     [JsonPropertyName("checkupDate")]
     public DateOnly? CheckupDate { get; set; }
 
-    public UpdatePointRecordCommand(int recordId, string? photoData, string? info, string? materialName, DateOnly? checkupDate)
+    public UpdatePointRecordCommand(int recordId, IFormFile? photoFile, string? info, string? materialName, DateOnly? checkupDate)
     {
         RecordId = recordId;
-        PhotoData = photoData;
+        PhotoFile = photoFile;
         Info = info;
         MaterialName = materialName;
         CheckupDate = checkupDate;
@@ -54,25 +57,24 @@ public class UpdatePointRecordCommand : IRequest<PointRecordDto?>
 
 public class UpdatePointRecordCommandHandler : IRequestHandler<UpdatePointRecordCommand, PointRecordDto?>
 {
-    private readonly IPointRecordRepository _repository;
+    private readonly IPointRecordService _service;
 
-    public UpdatePointRecordCommandHandler(IPointRecordRepository repository)
+    public UpdatePointRecordCommandHandler(IPointRecordService service)
     {
-        _repository = repository;
+        _service = service;
     }
 
     public async Task<PointRecordDto?> Handle(UpdatePointRecordCommand request, CancellationToken cancellationToken)
     {
-        var record = new PointRecordsEntity
+        var record = new PointRecordDto
         {   
             Id = request.RecordId,
-            PhotoData = request.PhotoData,
             Info = request.Info,
             MaterialName = request.MaterialName,
             CheckupDate = request.CheckupDate
         };
 
-        await _repository.UpdateRecordAsync(record);
+        await _service.UpdateRecordAsync(request.RecordId, record, request.PhotoFile);
         return record.Adapt<PointRecordDto>();
     }
 }

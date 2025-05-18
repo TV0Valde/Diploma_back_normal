@@ -38,7 +38,7 @@ public class PointsRepository : IPointsRepository
             .ToListAsync();
     }
 
-    public async Task<Points?> GetPointByIdAsync(int id)
+    public async Task<Points?> GetPointByIdAsync(long id)
     {
         return await _context.Points
             .Include(x =>x.Records)

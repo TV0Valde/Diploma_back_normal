@@ -34,7 +34,7 @@ public interface IPointsService
     /// </summary>
     /// <param name="id">id Точки</param>
     /// <returns>Обновленная точка</returns>
-    public Task<PointsResultDto?> UpdatePointAsync(Points point);
+    public Task<PointsResultDto?> UpdatePointAsync(long id);
 
     /// <summary>
     /// Удаление точки.

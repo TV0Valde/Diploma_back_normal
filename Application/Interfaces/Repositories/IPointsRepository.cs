@@ -19,7 +19,7 @@ public interface IPointsRepository
     /// </summary>
     /// <param name="id">Идентификатор точки.</param>
     /// <returns>Точка.</returns>
-    public Task<Points?> GetPointByIdAsync(int id);
+    public Task<Points?> GetPointByIdAsync(long id);
 
     /// <summary>
     /// Функция создания точки.
