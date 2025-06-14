@@ -20,7 +20,7 @@ namespace WebApi
                 options.AddPolicy("AllowFrontend",
                     policy =>
                     {
-                        policy.WithOrigins("http://83.222.16.222:8080") // Указываем фронтенд URL
+                        policy.WithOrigins("http://83.222.16.222") // Указываем фронтенд URL
                               .AllowAnyHeader()                     // Разрешаем любые заголовки
                               .AllowAnyMethod()                     // Разрешаем любые HTTP методы
                               .AllowCredentials();                  // Если используются куки или авторизация
