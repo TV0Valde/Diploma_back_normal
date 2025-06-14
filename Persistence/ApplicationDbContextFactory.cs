@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Npgsql.EntityFrameworkCore.PostgreSQL; 
 
 namespace Persistence
 {
@@ -9,7 +10,7 @@ namespace Persistence
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             // Указываем путь к appsettings.json в WebAPI
-            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../WebAPI");
+            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../WebApi");
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
